@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { deleteNote, editNote } from '../features/notes/noteSlice';
 
@@ -12,17 +12,25 @@ function ItemNote({ note }) {
    };
 
    const handleOnKeyDown = (e) => {
-      if (e.keyCode === 13 && values.title !== '' && values.description !== '') {
-         dispatch(editNote({ values, noteId: note._id }));
-         setStatusEdit(false);
+      if (e.keyCode === 13) {
+         if(values.title !== '' && values.description !== '') {
+          dispatch(editNote({ values, noteId: note._id }));
+          setStatusEdit(false);
+         }
+         if(values.title !== '' && values.description === '') {
+          setValues(values['description'] = note.description);
+          dispatch(editNote({ values, noteId: note._id }));
+          console.log(values);
+         }
+         if(values.title === '' && values.description !== '') {
+          setValues(values['title'] = note.title);
+          dispatch(editNote({ values, noteId: note._id }));
+          console.log(values);
+         }
+
       }
-      if (e.keyCode === 13 && values.title === '' && values.description !== '') {
-         dispatch(editNote({ title: note.title, description: values.description, noteId: note._id }));
-         setStatusEdit(false);
-      }
-      if (e.keyCode === 13 && values.title !== '' && values.description === '') {
-         dispatch(editNote({ title: values.title, description: note.description, noteId: note._id }));
-         setStatusEdit(false);
+      if (e.key === 'Escape') {
+        setStatusEdit(false);
       }
    };
 
@@ -35,9 +43,11 @@ function ItemNote({ note }) {
             <div className="form-group">
                <input
                   defaultValue={note.title}
+                  id="title" 
                   name="title"
                   onChange={onChange}
                   onKeyDown={(e) => handleOnKeyDown(e)}
+                  autoFocus
                />
                <input
                   defaultValue={note.description}
@@ -48,8 +58,8 @@ function ItemNote({ note }) {
             </div>
          ) : (
             <>
-               <h2 onClick={() => setStatusEdit(true)}>{note.title}</h2>
-               <h3 onClick={() => setStatusEdit(true)}>{note.description}</h3>
+               <h2 onClick={setStatusEdit} style={{cursor:'pointer'}}>{note.title}</h2>
+               <h3 onClick={setStatusEdit} style={{cursor:'pointer'}}>{note.description}</h3>
             </>
          )}
          <div>{new Date(note.createdAt).toLocaleString('en-US')}</div>
